@@ -907,8 +907,8 @@
 // GAS URL is loaded from localStorage (set via Settings page).
 // Fallback to hardcoded value if localStorage is empty.
 let GAS_URL = (function() {
-  try { return localStorage.getItem('gas_url') || 'YOUR_GAS_WEB_APP_URL_HERE'; }
-  catch(e) { return 'YOUR_GAS_WEB_APP_URL_HERE'; }
+  try { return localStorage.getItem('gas_url') || 'https://script.google.com/macros/s/AKfycbwq4-OlVJmyrgtIrY6uBMy6Zk50UAGQs6WwpjulW89_AUxbRRwg76U4KIDdBA5i5anDuw/exec'; }
+  catch(e) { return 'https://script.google.com/macros/s/AKfycbwq4-OlVJmyrgtIrY6uBMy6Zk50UAGQs6WwpjulW89_AUxbRRwg76U4KIDdBA5i5anDuw/exec'; }
 })();
 
 // ── State ─────────────────────────────────────────────────────
