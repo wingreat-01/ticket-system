@@ -10,11 +10,40 @@ const HEADERS = [
 ];
 
 // ── Entry Points ─────────────────────────────────────────────
-function doGet() {
-  return HtmlService
-    .createHtmlOutputFromFile("index")
-    .setTitle("IT Ticketing System")
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+// doGet serves the HTML page when no ?fn= param is present.
+// When ?fn= is present it acts as a JSONP API so external pages
+// (e.g. GitHub Pages) can call it cross-origin without CORS errors.
+function doGet(e) {
+  var params   = (e && e.parameter) ? e.parameter : {};
+  var fn       = params.fn;
+  var callback = params.callback || 'jsonpCb';
+
+  // Serve the HTML app when no fn param
+  if (!fn) {
+    return HtmlService
+      .createHtmlOutputFromFile("index")
+      .setTitle("IT Ticketing System")
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
+  // JSONP API — bypasses CORS for external origins (GitHub Pages etc.)
+  var result;
+  try {
+    var p = params.params;
+    if      (fn === 'getAllTickets')      result = getAllTickets();
+    else if (fn === 'getDashboardStats') result = getDashboardStats();
+    else if (fn === 'submitTicket')      result = submitTicket(p);
+    else if (fn === 'updateTicket')      result = updateTicket(p);
+    else if (fn === 'deleteTicket')      result = deleteTicket(p);
+    else result = JSON.stringify({ success: false, error: 'Unknown function: ' + fn });
+  } catch (err) {
+    result = JSON.stringify({ success: false, error: err.message });
+  }
+
+  var jsonp = callback + '(' + result + ');';
+  return ContentService
+    .createTextOutput(jsonp)
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 
 function doOptions(e) {
@@ -23,17 +52,18 @@ function doOptions(e) {
     .setMimeType(ContentService.MimeType.TEXT);
 }
 
+// doPost kept for backward compatibility / internal GAS use
 function doPost(e) {
   try {
     var payload = JSON.parse(e.postData.contents);
     var fn      = payload.fn;
-    var params  = payload.params;
+    var p       = payload.params;
     var result;
 
-    if      (fn === 'submitTicket')      result = submitTicket(params);
+    if      (fn === 'submitTicket')      result = submitTicket(p);
     else if (fn === 'getAllTickets')      result = getAllTickets();
-    else if (fn === 'updateTicket')      result = updateTicket(params);
-    else if (fn === 'deleteTicket')      result = deleteTicket(params);
+    else if (fn === 'updateTicket')      result = updateTicket(p);
+    else if (fn === 'deleteTicket')      result = deleteTicket(p);
     else if (fn === 'getDashboardStats') result = getDashboardStats();
     else result = JSON.stringify({ success: false, error: 'Unknown function: ' + fn });
 
@@ -96,10 +126,8 @@ function generateTicketId() {
   var year  = new Date().getFullYear();
   var lastRow = sheet.getLastRow();
 
-  // No tickets yet (only header row or empty)
   if (lastRow <= 1) return "TKT-" + year + "-0001";
 
-  // Scan all existing Ticket IDs and find the highest number
   var ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
   var max = 0;
   ids.forEach(function(row) {
@@ -116,8 +144,6 @@ function generateTicketId() {
 }
 
 // ── Submit New Ticket ────────────────────────────────────────
-// NOTE: Always return JSON.stringify — google.script.run cannot
-//       serialize Date objects or complex nested objects reliably.
 function submitTicket(dataJson) {
   try {
     var data = JSON.parse(dataJson);
@@ -131,7 +157,7 @@ function submitTicket(dataJson) {
       ticketId, nowStr,
       data.requesterName, data.department, data.email,
       data.category, data.priority, data.subject, data.description,
-      "Open", "", "", "", nowStr
+      "Open", "", "", "", nowStr, ""
     ];
 
     sheet.appendRow(row);
@@ -153,8 +179,6 @@ function submitTicket(dataJson) {
 }
 
 // ── Get All Tickets ──────────────────────────────────────────
-// Converts every cell to a plain string (including Date cells)
-// before JSON.stringify so nothing is lost in transit.
 function getAllTickets() {
   try {
     var sheet = getOrCreateSheet();
@@ -165,7 +189,7 @@ function getAllTickets() {
     var headers = data[0];
     var tickets = data.slice(1).map(function(row) {
       return rowToObj(headers, row);
-    }).reverse(); // newest first
+    }).reverse();
 
     return JSON.stringify({ success: true, tickets: tickets });
   } catch (e) {
@@ -207,10 +231,13 @@ function updateTicket(payloadJson) {
           );
         }
 
-        var lastUpdatedCol = headers.indexOf("Last Updated") + 1;
-        sheet.getRange(rowNum, lastUpdatedCol).setValue(
-          Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm:ss")
-        );
+        // Only update Last Updated when it's a ticket field change, not a signature-only save
+        if (!('Signature' in updates && Object.keys(updates).length === 1)) {
+          var lastUpdatedCol = headers.indexOf("Last Updated") + 1;
+          sheet.getRange(rowNum, lastUpdatedCol).setValue(
+            Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm:ss")
+          );
+        }
 
         return JSON.stringify({ success: true });
       }

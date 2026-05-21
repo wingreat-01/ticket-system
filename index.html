@@ -983,43 +983,54 @@ function navigate(page, statusFilter) {
   if (page === 'settings') loadSettingsPage();
 }
 
-// ── API Bridge (GET-based for static hosting) ────────────────
+// ── API Bridge (JSONP — works cross-origin from GitHub Pages) ─
+var _jsonpSeq = 0;
 function gRun(fn, params, cb) {
   if (!GAS_URL || GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
-    toast('⚠️ GAS_URL is not set in the script config.', 'error');
+    toast('⚠️ GAS_URL is not set. Go to Settings to configure it.', 'error');
     cb && cb(null);
     return;
   }
 
-  const url = new URL(GAS_URL);
-  url.searchParams.set('fn', fn);
-  if (params !== undefined) url.searchParams.set('params', params);
+  // Build a unique callback name so parallel calls don't collide
+  var cbName = '_gasCb_' + (++_jsonpSeq);
 
-  fetch(url.toString(), {
-    method: 'GET',
-    redirect: 'follow',
-    mode: 'cors'
-  })
-  .then(function(r) {
-    // GAS sometimes returns 302 redirects — text() is safer than json()
-    // for catching HTML error pages returned by GAS
-    return r.text();
-  })
-  .then(function(text) {
-    try {
-      const res = JSON.parse(text);
-      cb && cb(res);
-    } catch(e) {
-      console.error('GAS response was not JSON:', text.substring(0, 300));
-      toast('Server error — check browser console for details.', 'error');
-      cb && cb(null);
-    }
-  })
-  .catch(function(err) {
-    console.error('Fetch error:', err);
-    toast('Connection error: ' + err.message, 'error');
+  var url = GAS_URL
+    + (GAS_URL.indexOf('?') === -1 ? '?' : '&')
+    + 'fn=' + encodeURIComponent(fn)
+    + '&callback=' + encodeURIComponent(cbName);
+  if (params !== undefined) {
+    url += '&params=' + encodeURIComponent(params);
+  }
+
+  // Timeout — clean up if GAS never responds
+  var timer = setTimeout(function() {
+    delete window[cbName];
+    script.remove();
+    console.error('gRun timeout for fn=' + fn);
+    toast('Connection timed out. Check your GAS URL in Settings.', 'error');
     cb && cb(null);
-  });
+  }, 15000);
+
+  // Register callback before injecting the script tag
+  window[cbName] = function(res) {
+    clearTimeout(timer);
+    delete window[cbName];
+    script.remove();
+    cb && cb(res);
+  };
+
+  var script = document.createElement('script');
+  script.src = url;
+  script.onerror = function() {
+    clearTimeout(timer);
+    delete window[cbName];
+    script.remove();
+    console.error('JSONP script load error for fn=' + fn);
+    toast('Connection error — check GAS URL in Settings.', 'error');
+    cb && cb(null);
+  };
+  document.head.appendChild(script);
 }
 
 // ── Dashboard ─────────────────────────────────────────────────
@@ -1598,31 +1609,16 @@ function testGasUrl() {
   status.textContent = '⏳ Testing...';
   status.style.color = 'var(--muted)';
 
-  const url = new URL(GAS_URL);
-  url.searchParams.set('fn', 'getDashboardStats');
-
-  fetch(url.toString(), { method: 'GET', redirect: 'follow', mode: 'cors' })
-    .then(r => r.text())
-    .then(function(text) {
-      try {
-        const res = JSON.parse(text);
-        if (res.success !== undefined) {
-          status.textContent = '✓ Connection successful!';
-          status.style.color = 'var(--success)';
-          toast('GAS connection is working!', 'success');
-        } else {
-          status.textContent = '⚠️ Unexpected response.';
-          status.style.color = 'var(--warn)';
-        }
-      } catch(e) {
-        status.textContent = '✕ Not returning JSON — check deployment settings.';
-        status.style.color = 'var(--danger)';
-      }
-    })
-    .catch(function(err) {
-      status.textContent = '✕ Failed: ' + err.message;
+  gRun('getDashboardStats', undefined, function(res) {
+    if (res && res.success !== undefined) {
+      status.textContent = '✓ Connection successful!';
+      status.style.color = 'var(--success)';
+      toast('GAS connection is working!', 'success');
+    } else {
+      status.textContent = '✕ No response — check GAS deployment settings.';
       status.style.color = 'var(--danger)';
-    });
+    }
+  });
 }
 
 // ── Theme Switcher ────────────────────────────────────────────
