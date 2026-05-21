@@ -723,11 +723,11 @@
             <th>Subject</th>
             <th>Priority</th>
             <th>Status</th>
-            <th title="Signed & Approved">✍</th>
+            <th>Acknowledged By</th>
           </tr>
         </thead>
         <tbody id="tickets-body">
-          <tr><td colspan="8" style="text-align:center;padding:40px;"><div class="spinner"></div></td></tr>
+          <tr><td colspan="9" style="text-align:center;padding:40px;"><div class="spinner"></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -1108,7 +1108,7 @@ function loadTickets(callback, forceRefresh) {
 function renderTickets(tickets) {
   const tbody = document.getElementById('tickets-body');
   if (!tickets.length) {
-    tbody.innerHTML = `<tr><td colspan="8">
+    tbody.innerHTML = `<tr><td colspan="9">
       <div class="empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H5z"/></svg>
         <div class="empty-title">No tickets found</div>
@@ -1127,7 +1127,14 @@ function renderTickets(tickets) {
       <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t['Subject']}</td>
       <td>${priorityBadge(t['Priority'])}</td>
       <td>${statusBadge(t['Status'])}</td>
-      <td style="text-align:center;font-size:16px" title="${t['Signature'] ? 'Signed' : 'Not signed'}">${t['Signature'] ? '✅' : '<span style="color:var(--muted);font-size:12px">—</span>'}</td>
+      <td style="font-size:13px;white-space:nowrap">${
+        t['Acknowledged By']
+          ? `<span style="display:inline-flex;align-items:center;gap:5px;color:var(--success);font-weight:600">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>
+               ${t['Acknowledged By']}
+             </span>`
+          : `<span style="color:var(--muted);font-size:12px">—</span>`
+      }</td>
     </tr>`).join('');
 }
 
@@ -1189,7 +1196,8 @@ function submitNewTicket() {
           'Resolution Notes':'',
           'Date Resolved':   '',
           'Last Updated':    now,
-          'Signature':       ''
+          'Signature':       '',
+          'Acknowledged By': ''
         });
         clearForm();
         navigate('tickets');
@@ -1223,7 +1231,10 @@ function openTicket(ticketId) {
       <div class="detail-item"><div class="detail-key">Category</div><div class="detail-val">${t['Category']}</div></div>
       <div class="detail-item"><div class="detail-key">Priority</div><div class="detail-val">${priorityBadge(t['Priority'])}</div></div>
       <div class="detail-item full"><div class="detail-key">Description</div><div class="detail-val" style="font-weight:400;line-height:1.6">${t['Description']}</div></div>
-      ${t['Signature'] ? `<div class="detail-item full"><div class="detail-key">Signature</div><div class="detail-val"><img src="${t['Signature']}" alt="Signature" style="max-height:64px;border-radius:6px;background:#fff;padding:4px;border:1px solid var(--border);display:block;margin-top:4px;"></div></div>` : ''}
+      ${t['Acknowledged By'] ? `<div class="detail-item full"><div class="detail-key">Acknowledged By</div><div class="detail-val" style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+        <span style="color:var(--success);font-weight:700;font-size:15px">✔ ${t['Acknowledged By']}</span>
+        ${t['Signature'] ? `<img src="${t['Signature']}" alt="Signature" style="max-height:56px;border-radius:6px;background:#fff;padding:4px;border:1px solid var(--border);display:block;">` : ''}
+      </div></div>` : ''}
     </div>
 
     <div class="section-divider">Update Ticket</div>
@@ -1264,15 +1275,15 @@ function openTicket(ticketId) {
   document.getElementById('ticket-modal').classList.add('open');
   applyModalMode();
 
-  // Show Sign button always (non-admin users sign, admin can still view)
+  // Show Sign/Acknowledge button
   const signBtn = document.getElementById('sign-btn');
   if (signBtn) {
-    const isSigned = !!(t['Signature']);
+    const isSigned = !!(t['Acknowledged By']);
     signBtn.style.display = '';
     signBtn.classList.toggle('btn-sign-approved', isSigned);
-    signBtn.title = isSigned ? 'View / Re-sign' : 'Sign & Approve';
+    signBtn.title = isSigned ? 'View / Re-acknowledge' : 'Acknowledge & Sign';
     signBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> '
-      + (isSigned ? 'Re-sign' : 'Sign');
+      + (isSigned ? '✔ ' + t['Acknowledged By'] : 'Acknowledge');
   }
 }
 
@@ -1645,10 +1656,15 @@ function showSignatureModal() {
   const ticket = allTickets.find(x => x['Ticket ID'] === currentTicketId);
   if (!ticket) return;
 
-  const existing = ticket['Signature'] || '';
-  const existingHtml = existing
-    ? '<div class="sig-existing"><p>Current signature:</p><img src="' + existing + '" alt="signature"></div>'
-      + '<p style="font-size:12px;color:var(--muted);margin:0 0 8px">Draw a new signature to replace existing:</p>'
+  const existing      = ticket['Signature'] || '';
+  const existingName  = ticket['Acknowledged By'] || '';
+
+  const existingHtml = (existing && existingName)
+    ? '<div class="sig-existing">'
+      + '<p>Currently acknowledged by: <strong style="color:var(--success)">' + existingName + '</strong></p>'
+      + '<img src="' + existing + '" alt="signature">'
+      + '</div>'
+      + '<p style="font-size:12px;color:var(--muted);margin:0 0 10px">Draw a new signature below to replace it:</p>'
     : '';
 
   const mount = document.getElementById('sig-modal-mount');
@@ -1656,23 +1672,28 @@ function showSignatureModal() {
     + '<div class="sig-overlay" id="sigOverlay">'
     + '  <div class="sig-card" onclick="event.stopPropagation()">'
     + '    <div class="sig-card-header">'
-    + '      <h3>Sign &amp; Approve — ' + ticket['Ticket ID'] + '</h3>'
+    + '      <h3>Acknowledge — ' + ticket['Ticket ID'] + '</h3>'
     + '      <button class="modal-close" id="sigCloseBtn">'
     + '        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
     + '      </button>'
     + '    </div>'
     + '    <div class="sig-card-body">'
     + existingHtml
-    + '      <canvas id="sigCanvas" width="500" height="180"></canvas>'
-    + '      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">'
+    + '      <div style="margin-bottom:12px;">'
+    + '        <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Your Name *</label>'
+    + '        <input id="sigNameInput" type="text" class="form-input" placeholder="Enter your full name" value="' + existingName + '" style="font-size:14px;font-weight:600;" />'
+    + '      </div>'
+    + '      <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Signature *</label>'
+    + '      <canvas id="sigCanvas" width="500" height="160"></canvas>'
+    + '      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">'
     + '        <button class="btn btn-ghost btn-sm" id="sigClearBtn">Clear</button>'
     + '        <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">Sign with mouse or finger</span>'
     + '      </div>'
     + '    </div>'
     + '    <div class="sig-card-footer">'
-    + (existing ? '<button class="btn btn-danger btn-sm" id="sigDeleteBtn" style="margin-right:auto">Delete Signature</button>' : '')
+    + (existing ? '<button class="btn btn-danger btn-sm" id="sigDeleteBtn" style="margin-right:auto">Remove Acknowledgement</button>' : '')
     + '      <button class="btn btn-ghost btn-sm" id="sigCancelBtn">Cancel</button>'
-    + '      <button class="btn btn-primary btn-sm" id="sigSaveBtn">Approve &amp; Sign</button>'
+    + '      <button class="btn btn-primary btn-sm" id="sigSaveBtn">✔ Acknowledge</button>'
     + '    </div>'
     + '  </div>'
     + '</div>';
@@ -1690,9 +1711,9 @@ function showSignatureModal() {
 
   if (existing) {
     document.getElementById('sigDeleteBtn').addEventListener('click', function () {
-      if (confirm('Delete the existing signature? This cannot be undone.')) {
+      if (confirm('Remove acknowledgement from this ticket? This cannot be undone.')) {
         closeSigModal();
-        _persistSignature('');
+        _persistSignature('', '');
       }
     });
   }
@@ -1759,39 +1780,48 @@ function showSignatureModal() {
   });
 
   document.getElementById('sigSaveBtn').addEventListener('click', function () {
+    const name = document.getElementById('sigNameInput').value.trim();
+    if (!name) { toast('Please enter your name before signing.', 'error'); document.getElementById('sigNameInput').focus(); return; }
     const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const hasInk = Array.prototype.some.call(pixels, function (v, i) { return i % 4 === 3 && v > 0; });
-    if (!hasInk) { toast('Please draw a signature first.', 'error'); return; }
+    if (!hasInk) { toast('Please draw your signature.', 'error'); return; }
     const dataUrl = canvas.toDataURL('image/png');
     closeSigModal();
-    _persistSignature(dataUrl);
+    _persistSignature(dataUrl, name);
   });
 }
 
-function _persistSignature(dataUrl) {
+function _persistSignature(dataUrl, name) {
   if (!currentTicketId) return;
   const ticketId = currentTicketId;
   const idx = allTickets.findIndex(x => x['Ticket ID'] === ticketId);
   if (idx === -1) return;
 
-  const snapshot = allTickets[idx]['Signature'];
-  allTickets[idx]['Signature'] = dataUrl;
+  const snapSig  = allTickets[idx]['Signature'];
+  const snapName = allTickets[idx]['Acknowledged By'];
+  allTickets[idx]['Signature']       = dataUrl;
+  allTickets[idx]['Acknowledged By'] = name;
 
   // Update Sign button in modal footer
   const signBtn = document.getElementById('sign-btn');
   if (signBtn) {
-    const isSigned = !!dataUrl;
+    const isSigned = !!name;
     signBtn.classList.toggle('btn-sign-approved', isSigned);
     signBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> '
-      + (isSigned ? 'Re-sign' : 'Sign');
+      + (isSigned ? '✔ ' + name : 'Acknowledge');
   }
 
-  toast(dataUrl ? 'Ticket signed & approved!' : 'Signature deleted.', 'success');
+  // Refresh ticket table row
+  renderTickets(allTickets);
 
-  gRun('updateTicket', JSON.stringify({ ticketId: ticketId, updates: { 'Signature': dataUrl } }), function (res) {
+  toast(dataUrl ? 'Ticket acknowledged by ' + name + '!' : 'Acknowledgement removed.', 'success');
+
+  gRun('updateTicket', JSON.stringify({ ticketId: ticketId, updates: { 'Signature': dataUrl, 'Acknowledged By': name } }), function (res) {
     if (!res || !res.success) {
-      allTickets[idx]['Signature'] = snapshot;
-      toast('Sync failed — signature may not be saved.', 'error');
+      allTickets[idx]['Signature']       = snapSig;
+      allTickets[idx]['Acknowledged By'] = snapName;
+      renderTickets(allTickets);
+      toast('Sync failed — acknowledgement may not be saved.', 'error');
     }
   });
 }

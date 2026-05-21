@@ -6,7 +6,7 @@ const SHEET_NAME = "Tickets";
 const HEADERS = [
   "Ticket ID", "Date Submitted", "Requester Name", "Department",
   "Email", "Category", "Priority", "Subject", "Description",
-  "Status", "Assigned To", "Resolution Notes", "Date Resolved", "Last Updated", "Signature"
+  "Status", "Assigned To", "Resolution Notes", "Date Resolved", "Last Updated", "Signature", "Acknowledged By"
 ];
 
 // ── Entry Points ─────────────────────────────────────────────
@@ -157,7 +157,7 @@ function submitTicket(dataJson) {
       ticketId, nowStr,
       data.requesterName, data.department, data.email,
       data.category, data.priority, data.subject, data.description,
-      "Open", "", "", "", nowStr, ""
+      "Open", "", "", "", nowStr, "", ""
     ];
 
     sheet.appendRow(row);
@@ -215,7 +215,8 @@ function updateTicket(payloadJson) {
           "Assigned To":      headers.indexOf("Assigned To") + 1,
           "Resolution Notes": headers.indexOf("Resolution Notes") + 1,
           "Priority":         headers.indexOf("Priority") + 1,
-          "Signature":        headers.indexOf("Signature") + 1
+          "Signature":        headers.indexOf("Signature") + 1,
+          "Acknowledged By":  headers.indexOf("Acknowledged By") + 1
         };
 
         Object.keys(updates).forEach(function(field) {
@@ -231,8 +232,10 @@ function updateTicket(payloadJson) {
           );
         }
 
-        // Only update Last Updated when it's a ticket field change, not a signature-only save
-        if (!('Signature' in updates && Object.keys(updates).length === 1)) {
+        // Don't bump Last Updated for signature/acknowledgement-only saves
+        var sigOnlyKeys = ['Signature', 'Acknowledged By'];
+        var isAckOnly = Object.keys(updates).every(function(k) { return sigOnlyKeys.indexOf(k) !== -1; });
+        if (!isAckOnly) {
           var lastUpdatedCol = headers.indexOf("Last Updated") + 1;
           sheet.getRange(rowNum, lastUpdatedCol).setValue(
             Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm:ss")
