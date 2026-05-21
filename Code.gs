@@ -6,7 +6,7 @@ const SHEET_NAME = "Tickets";
 const HEADERS = [
   "Ticket ID", "Date Submitted", "Requester Name", "Department",
   "Email", "Category", "Priority", "Subject", "Description",
-  "Status", "Assigned To", "Resolution Notes", "Date Resolved", "Last Updated"
+  "Status", "Assigned To", "Resolution Notes", "Date Resolved", "Last Updated", "Signature"
 ];
 
 // ── Entry Points ─────────────────────────────────────────────
@@ -190,7 +190,8 @@ function updateTicket(payloadJson) {
           "Status":           headers.indexOf("Status") + 1,
           "Assigned To":      headers.indexOf("Assigned To") + 1,
           "Resolution Notes": headers.indexOf("Resolution Notes") + 1,
-          "Priority":         headers.indexOf("Priority") + 1
+          "Priority":         headers.indexOf("Priority") + 1,
+          "Signature":        headers.indexOf("Signature") + 1
         };
 
         Object.keys(updates).forEach(function(field) {

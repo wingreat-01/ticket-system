@@ -91,7 +91,41 @@
   .theme-dot-light { background: #f0f2f5; border: 1px solid #d1d9e6; }
   .theme-dot-slate { background: #313338; }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── Signature ── */
+  .btn-sign-approved { color: var(--success) !important; border-color: var(--success) !important; }
+  #sigCanvas { touch-action: none; display: block; width: 100%; border: 1px solid var(--border); border-radius: 8px; background: #fff; cursor: crosshair; }
+  .sig-existing { margin-bottom: 12px; }
+  .sig-existing p { font-size: 11px; color: var(--muted); margin: 0 0 4px; font-family: var(--mono); }
+  .sig-existing img { max-width: 100%; max-height: 80px; border-radius: 6px; background: #fff; padding: 4px; border: 1px solid var(--border); display: block; }
+  .sig-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(3px);
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sig-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: 560px; max-width: 95vw;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  }
+  .sig-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .sig-card-header h3 { margin: 0; font-size: 15px; font-weight: 700; }
+  .sig-card-body { padding: 18px 20px; }
+  .sig-card-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 8px; align-items: center;
+  }
+
+
 
   body {
     background: var(--bg);
@@ -689,6 +723,7 @@
             <th>Subject</th>
             <th>Priority</th>
             <th>Status</th>
+            <th title="Signed & Approved">✍</th>
           </tr>
         </thead>
         <tbody id="tickets-body">
@@ -858,6 +893,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         Delete
       </button>
+      <button class="btn btn-ghost btn-sm" id="sign-btn" onclick="showSignatureModal()" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+        Sign
+      </button>
       <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
       <button class="btn btn-primary btn-sm" id="save-btn" onclick="saveUpdate()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -901,6 +940,9 @@
 
 <!-- Toast container -->
 <div class="toast-container" id="toast-container"></div>
+
+<!-- Signature modal mount -->
+<div id="sig-modal-mount"></div>
 
 <script>
 // ── Config ───────────────────────────────────────────────────
@@ -1002,7 +1044,7 @@ function computeAndRenderDashboard(tickets) {
   const entries = Object.entries(cats).sort((a,b) => b[1]-a[1]);
   catBody.innerHTML = entries.length ? entries.map(([k,v]) =>
     '<tr><td>' + k + '</td><td><strong>' + v + '</strong></td></tr>').join('')
-    : '<tr><td colspan="2"><div class="empty">No data yet</div></td></tr>';
+    : '<tr><td colspan="2" style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">No data yet</td></tr>';
 
   const recent = tickets.slice(0, 8);
   const tbody = document.getElementById('recent-tickets-body');
@@ -1013,7 +1055,7 @@ function computeAndRenderDashboard(tickets) {
     '<td>' + priorityBadge(t['Priority']) + '</td>' +
     '<td>' + statusBadge(t['Status']) + '</td>' +
     '</tr>').join('')
-    : '<tr><td colspan="4" class="empty">No tickets yet</td></tr>';
+    : '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">No tickets yet</td></tr>';
 }
 
 function loadDashboard() {
@@ -1023,9 +1065,13 @@ function loadDashboard() {
     return;
   }
   gRun('getAllTickets', undefined, function(res) {
-    if (!res || !res.success) return;
-    allTickets = res.tickets || [];
-    ticketsCachedAt = Date.now();
+    if (res && res.success) {
+      allTickets = res.tickets || [];
+      ticketsCachedAt = Date.now();
+    } else {
+      // On failure, still clear the spinners with whatever we have (possibly empty)
+      allTickets = allTickets.length ? allTickets : [];
+    }
     computeAndRenderDashboard(allTickets);
   });
 }
@@ -1070,6 +1116,7 @@ function renderTickets(tickets) {
       <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t['Subject']}</td>
       <td>${priorityBadge(t['Priority'])}</td>
       <td>${statusBadge(t['Status'])}</td>
+      <td style="text-align:center;font-size:16px" title="${t['Signature'] ? 'Signed' : 'Not signed'}">${t['Signature'] ? '✅' : '<span style="color:var(--muted);font-size:12px">—</span>'}</td>
     </tr>`).join('');
 }
 
@@ -1130,7 +1177,8 @@ function submitNewTicket() {
           'Assigned To':     '',
           'Resolution Notes':'',
           'Date Resolved':   '',
-          'Last Updated':    now
+          'Last Updated':    now,
+          'Signature':       ''
         });
         clearForm();
         navigate('tickets');
@@ -1164,6 +1212,7 @@ function openTicket(ticketId) {
       <div class="detail-item"><div class="detail-key">Category</div><div class="detail-val">${t['Category']}</div></div>
       <div class="detail-item"><div class="detail-key">Priority</div><div class="detail-val">${priorityBadge(t['Priority'])}</div></div>
       <div class="detail-item full"><div class="detail-key">Description</div><div class="detail-val" style="font-weight:400;line-height:1.6">${t['Description']}</div></div>
+      ${t['Signature'] ? `<div class="detail-item full"><div class="detail-key">Signature</div><div class="detail-val"><img src="${t['Signature']}" alt="Signature" style="max-height:64px;border-radius:6px;background:#fff;padding:4px;border:1px solid var(--border);display:block;margin-top:4px;"></div></div>` : ''}
     </div>
 
     <div class="section-divider">Update Ticket</div>
@@ -1203,6 +1252,17 @@ function openTicket(ticketId) {
 
   document.getElementById('ticket-modal').classList.add('open');
   applyModalMode();
+
+  // Show Sign button always (non-admin users sign, admin can still view)
+  const signBtn = document.getElementById('sign-btn');
+  if (signBtn) {
+    const isSigned = !!(t['Signature']);
+    signBtn.style.display = '';
+    signBtn.classList.toggle('btn-sign-approved', isSigned);
+    signBtn.title = isSigned ? 'View / Re-sign' : 'Sign & Approve';
+    signBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> '
+      + (isSigned ? 'Re-sign' : 'Sign');
+  }
 }
 
 function closeModal() {
@@ -1582,6 +1642,163 @@ function setTheme(theme) {
 
 // Initial load
 loadDashboard();
+
+// ── Signature Pad ─────────────────────────────────────────────
+function showSignatureModal() {
+  if (!currentTicketId) return;
+  const ticket = allTickets.find(x => x['Ticket ID'] === currentTicketId);
+  if (!ticket) return;
+
+  const existing = ticket['Signature'] || '';
+  const existingHtml = existing
+    ? '<div class="sig-existing"><p>Current signature:</p><img src="' + existing + '" alt="signature"></div>'
+      + '<p style="font-size:12px;color:var(--muted);margin:0 0 8px">Draw a new signature to replace existing:</p>'
+    : '';
+
+  const mount = document.getElementById('sig-modal-mount');
+  mount.innerHTML = ''
+    + '<div class="sig-overlay" id="sigOverlay">'
+    + '  <div class="sig-card" onclick="event.stopPropagation()">'
+    + '    <div class="sig-card-header">'
+    + '      <h3>Sign &amp; Approve — ' + ticket['Ticket ID'] + '</h3>'
+    + '      <button class="modal-close" id="sigCloseBtn">'
+    + '        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+    + '      </button>'
+    + '    </div>'
+    + '    <div class="sig-card-body">'
+    + existingHtml
+    + '      <canvas id="sigCanvas" width="500" height="180"></canvas>'
+    + '      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">'
+    + '        <button class="btn btn-ghost btn-sm" id="sigClearBtn">Clear</button>'
+    + '        <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">Sign with mouse or finger</span>'
+    + '      </div>'
+    + '    </div>'
+    + '    <div class="sig-card-footer">'
+    + (existing ? '<button class="btn btn-danger btn-sm" id="sigDeleteBtn" style="margin-right:auto">Delete Signature</button>' : '')
+    + '      <button class="btn btn-ghost btn-sm" id="sigCancelBtn">Cancel</button>'
+    + '      <button class="btn btn-primary btn-sm" id="sigSaveBtn">Approve &amp; Sign</button>'
+    + '    </div>'
+    + '  </div>'
+    + '</div>';
+
+  function closeSigModal() { mount.innerHTML = ''; }
+
+  document.getElementById('sigCloseBtn').addEventListener('click', closeSigModal);
+  document.getElementById('sigCancelBtn').addEventListener('click', closeSigModal);
+  document.getElementById('sigOverlay').addEventListener('click', closeSigModal);
+
+  function _escHandler(e) {
+    if (e.key === 'Escape') { closeSigModal(); document.removeEventListener('keydown', _escHandler); }
+  }
+  document.addEventListener('keydown', _escHandler);
+
+  if (existing) {
+    document.getElementById('sigDeleteBtn').addEventListener('click', function () {
+      if (confirm('Delete the existing signature? This cannot be undone.')) {
+        closeSigModal();
+        _persistSignature('');
+      }
+    });
+  }
+
+  // Canvas drawing
+  const canvas = document.getElementById('sigCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#111827';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  let _drawing = false, _lx = 0, _ly = 0, _midX = 0, _midY = 0;
+
+  function _pt(e) {
+    const r = canvas.getBoundingClientRect();
+    const sx = canvas.width / r.width;
+    const sy = canvas.height / r.height;
+    const src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - r.left) * sx, y: (src.clientY - r.top) * sy };
+  }
+  function _start(e) {
+    e.preventDefault();
+    _drawing = true;
+    const p = _pt(e);
+    _lx = p.x; _ly = p.y; _midX = p.x; _midY = p.y;
+    ctx.beginPath();
+    ctx.arc(_lx, _ly, ctx.lineWidth / 2, 0, Math.PI * 2);
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.fill();
+  }
+  function _move(e) {
+    if (!_drawing) return;
+    e.preventDefault();
+    const p = _pt(e);
+    const newMidX = (_lx + p.x) / 2;
+    const newMidY = (_ly + p.y) / 2;
+    ctx.beginPath();
+    ctx.moveTo(_midX, _midY);
+    ctx.quadraticCurveTo(_lx, _ly, newMidX, newMidY);
+    ctx.stroke();
+    _midX = newMidX; _midY = newMidY;
+    _lx = p.x; _ly = p.y;
+  }
+  function _stop() {
+    if (!_drawing) return;
+    _drawing = false;
+    ctx.beginPath();
+    ctx.moveTo(_midX, _midY);
+    ctx.quadraticCurveTo(_lx, _ly, _lx, _ly);
+    ctx.stroke();
+  }
+
+  canvas.addEventListener('mousedown', _start);
+  canvas.addEventListener('mousemove', _move);
+  canvas.addEventListener('mouseup', _stop);
+  canvas.addEventListener('mouseleave', _stop);
+  canvas.addEventListener('touchstart', _start, { passive: false });
+  canvas.addEventListener('touchmove', _move, { passive: false });
+  canvas.addEventListener('touchend', _stop);
+
+  document.getElementById('sigClearBtn').addEventListener('click', function () {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  document.getElementById('sigSaveBtn').addEventListener('click', function () {
+    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const hasInk = Array.prototype.some.call(pixels, function (v, i) { return i % 4 === 3 && v > 0; });
+    if (!hasInk) { toast('Please draw a signature first.', 'error'); return; }
+    const dataUrl = canvas.toDataURL('image/png');
+    closeSigModal();
+    _persistSignature(dataUrl);
+  });
+}
+
+function _persistSignature(dataUrl) {
+  if (!currentTicketId) return;
+  const ticketId = currentTicketId;
+  const idx = allTickets.findIndex(x => x['Ticket ID'] === ticketId);
+  if (idx === -1) return;
+
+  const snapshot = allTickets[idx]['Signature'];
+  allTickets[idx]['Signature'] = dataUrl;
+
+  // Update Sign button in modal footer
+  const signBtn = document.getElementById('sign-btn');
+  if (signBtn) {
+    const isSigned = !!dataUrl;
+    signBtn.classList.toggle('btn-sign-approved', isSigned);
+    signBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> '
+      + (isSigned ? 'Re-sign' : 'Sign');
+  }
+
+  toast(dataUrl ? 'Ticket signed & approved!' : 'Signature deleted.', 'success');
+
+  gRun('updateTicket', JSON.stringify({ ticketId: ticketId, updates: { 'Signature': dataUrl } }), function (res) {
+    if (!res || !res.success) {
+      allTickets[idx]['Signature'] = snapshot;
+      toast('Sync failed — signature may not be saved.', 'error');
+    }
+  });
+}
 </script>
 </body>
 </html>
