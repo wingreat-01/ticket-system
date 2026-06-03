@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0053)file:///C:/Users/WAREHOUSE-PC/Downloads/index_90.html -->
+<!-- saved from url=(0053)file:///C:/Users/WAREHOUSE-PC/Downloads/index_91.html -->
 <html lang="en" data-theme="dark"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -146,80 +146,33 @@
     transition: width 0.25s cubic-bezier(0.4,0,0.2,1);
     overflow: hidden;
   }
-  .sidebar.collapsed {
-    width: 56px;
-  }
+  .sidebar.collapsed { width: 56px; }
   .sidebar.collapsed .logo-sub,
   .sidebar.collapsed .nav-label,
-  .sidebar.collapsed .nav-item span,
   .sidebar.collapsed .admin-pill,
   .sidebar.collapsed .theme-switcher-label,
-  .sidebar.collapsed .theme-btns,
-  .sidebar.collapsed .admin-toggle-btn span,
-  .sidebar.collapsed .logo-badge span {
-    opacity: 0;
-    pointer-events: none;
-    width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    display: none;
-  }
-  .sidebar.collapsed .logo-badge {
-    padding: 8px;
-    justify-content: center;
-  }
-  .sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding: 10px;
-  }
-  .sidebar.collapsed .nav-item.active {
-    border-left: 3px solid var(--accent);
-    padding-left: 7px;
-  }
-  .sidebar.collapsed .admin-toggle-btn {
-    justify-content: center;
-    padding: 10px;
-  }
-  .sidebar.collapsed .theme-switcher {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 12px 0;
-  }
-  .sidebar.collapsed .logo {
-    padding: 18px 8px;
-    display: flex;
-    justify-content: center;
-  }
+  .sidebar.collapsed .theme-btns { display: none; }
+  .sidebar.collapsed .logo-badge { padding: 8px; justify-content: center; }
+  .sidebar.collapsed .logo-badge span { display: none; }
+  .sidebar.collapsed .logo { padding: 18px 8px; display: flex; justify-content: center; }
+  .sidebar.collapsed .nav-item { justify-content: center; padding: 10px; }
+  .sidebar.collapsed .nav-item.active { border-left: 3px solid var(--accent); padding-left: 7px; }
+  .sidebar.collapsed .nav-item span { display: none; }
+  .sidebar.collapsed .admin-toggle-btn { justify-content: center; padding: 10px; }
+  .sidebar.collapsed .admin-toggle-btn span { display: none; }
+  .sidebar.collapsed .theme-switcher { display: flex; justify-content: center; padding: 12px 0; }
   .sidebar-toggle {
-    position: fixed;
-    top: 14px;
-    left: 204px;
-    z-index: 200;
+    position: fixed; top: 14px; left: 204px; z-index: 200;
     width: 28px; height: 28px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    transition: left 0.25s cubic-bezier(0.4,0,0.2,1), background 0.18s, transform 0.25s;
-    color: var(--muted);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--muted);
+    transition: left 0.25s cubic-bezier(0.4,0,0.2,1), background 0.18s;
   }
-  .sidebar-toggle:hover {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .sidebar-toggle.collapsed {
-    left: 20px;
-  }
-  .sidebar-toggle svg {
-    width: 14px; height: 14px;
-    transition: transform 0.25s;
-  }
-  .sidebar-toggle.collapsed svg {
-    transform: rotate(180deg);
-  }
+  .sidebar-toggle:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .sidebar-toggle.collapsed { left: 20px; }
+  .sidebar-toggle svg { width: 14px; height: 14px; transition: transform 0.25s; }
+  .sidebar-toggle.collapsed svg { transform: rotate(180deg); }
 
   .logo {
     padding: 28px 24px 20px;
@@ -263,9 +216,7 @@
     min-height: 100vh;
     transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1);
   }
-  .main.sidebar-collapsed {
-    margin-left: 56px;
-  }
+  .main.sidebar-collapsed { margin-left: 56px; }
 
   .page { display: none; }
   .page.active { display: block; animation: fadeIn .25s ease; }
@@ -606,9 +557,7 @@
 
 <!-- Sidebar Toggle -->
 <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-    <polyline points="15 18 9 12 15 6"></polyline>
-  </svg>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
 </button>
 
 <!-- Sidebar -->
@@ -625,35 +574,35 @@
 
   <nav class="nav">
     <div class="nav-label">Menu</div>
-    <button class="nav-item active" onclick="navigate(&#39;dashboard&#39;)" title="Dashboard">
+    <button class="nav-item active" onclick="navigate(&#39;dashboard&#39;)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
       Dashboard
     </button>
-    <button class="nav-item" onclick="navigate(&#39;tickets&#39;)" title="All Tickets">
+    <button class="nav-item" onclick="navigate(&#39;tickets&#39;)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H5z"></path></svg>
       All Tickets
     </button>
-    <button class="nav-item" onclick="navigate(&#39;new-ticket&#39;)" title="New Ticket">
+    <button class="nav-item" onclick="navigate(&#39;new-ticket&#39;)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
       New Ticket
     </button>
 
     <div class="nav-label">System</div>
-    <button class="nav-item" onclick="pinPurpose=&#39;settings&#39;; openPinModal()" title="Settings">
+    <button class="nav-item" onclick="pinPurpose=&#39;settings&#39;; openPinModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       Settings
     </button>
 
     <div class="nav-label">Filter</div>
-    <button class="nav-item" onclick="navigate(&#39;tickets&#39;, &#39;Open&#39;)" title="Open">
+    <button class="nav-item" onclick="navigate(&#39;tickets&#39;, &#39;Open&#39;)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
       Open
     </button>
-    <button class="nav-item" onclick="navigate(&#39;tickets&#39;, &#39;In Progress&#39;)" title="In Progress">
+    <button class="nav-item" onclick="navigate(&#39;tickets&#39;, &#39;In Progress&#39;)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
       In Progress
     </button>
-    <button class="nav-item" onclick="navigate(&#39;tickets&#39;, &#39;Resolved&#39;)" title="Resolved">
+    <button class="nav-item" onclick="navigate(&#39;tickets&#39;, &#39;Resolved&#39;)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
       Resolved
     </button>
@@ -1024,7 +973,7 @@
 </div>
 
 <!-- Toast container -->
-<div class="toast-container" id="toast-container"></div>
+<div class="toast-container" id="toast-container"><div class="toast error"><span style="font-size:16px">✕</span><span>Connection error — check GAS URL in Settings.</span></div></div>
 
 <!-- Signature modal mount -->
 <div id="sig-modal-mount"></div>
@@ -1032,7 +981,7 @@
 <script>
 // ── Sidebar Collapse ─────────────────────────────────────────
 (function initSidebar() {
-  let collapsed = false;
+  var collapsed = false;
   try { collapsed = localStorage.getItem('sidebar-collapsed') === 'true'; } catch(e) {}
   if (collapsed) {
     document.querySelector('.sidebar').classList.add('collapsed');
@@ -1040,16 +989,15 @@
     document.getElementById('sidebar-toggle').classList.add('collapsed');
   }
 })();
-
 function toggleSidebar() {
-  const sidebar  = document.querySelector('.sidebar');
-  const main     = document.querySelector('.main');
-  const btn      = document.getElementById('sidebar-toggle');
-  const isNowCollapsed = !sidebar.classList.contains('collapsed');
-  sidebar.classList.toggle('collapsed', isNowCollapsed);
-  main.classList.toggle('sidebar-collapsed', isNowCollapsed);
-  btn.classList.toggle('collapsed', isNowCollapsed);
-  try { localStorage.setItem('sidebar-collapsed', isNowCollapsed); } catch(e) {}
+  var sidebar = document.querySelector('.sidebar');
+  var main    = document.querySelector('.main');
+  var btn     = document.getElementById('sidebar-toggle');
+  var c = !sidebar.classList.contains('collapsed');
+  sidebar.classList.toggle('collapsed', c);
+  main.classList.toggle('sidebar-collapsed', c);
+  btn.classList.toggle('collapsed', c);
+  try { localStorage.setItem('sidebar-collapsed', c); } catch(e) {}
 }
 
 // ── Config ───────────────────────────────────────────────────
@@ -1090,53 +1038,101 @@ function navigate(page, statusFilter) {
   if (page === 'settings') loadSettingsPage();
 }
 
-// ── API Bridge (JSONP — works cross-origin from GitHub Pages) ─
+// ── API Bridge ────────────────────────────────────────────────
+// Uses fetch() first (handles GAS redirect on mobile), JSONP as fallback.
 var _jsonpSeq = 0;
+
+function _buildGasUrl(fn, params, cbName) {
+  var url = GAS_URL
+    + (GAS_URL.indexOf('?') === -1 ? '?' : '&')
+    + 'fn=' + encodeURIComponent(fn);
+  if (params !== undefined) url += '&params=' + encodeURIComponent(params);
+  if (cbName) url += '&callback=' + encodeURIComponent(cbName);
+  return url;
+}
+
 function gRun(fn, params, cb) {
   if (!GAS_URL || GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
-    toast('⚠️ GAS_URL is not set. Go to Settings to configure it.', 'error');
+    toast('GAS_URL is not set. Go to Settings to configure it.', 'error');
     cb && cb(null);
     return;
   }
 
-  // Build a unique callback name so parallel calls don't collide
-  var cbName = '_gasCb_' + (++_jsonpSeq);
+  var settled = false;
 
-  var url = GAS_URL
-    + (GAS_URL.indexOf('?') === -1 ? '?' : '&')
-    + 'fn=' + encodeURIComponent(fn)
-    + '&callback=' + encodeURIComponent(cbName);
-  if (params !== undefined) {
-    url += '&params=' + encodeURIComponent(params);
+  function settle(res) {
+    if (settled) return;
+    settled = true;
+    cb && cb(res);
   }
 
-  // Timeout — clean up if GAS never responds
+  // ── Attempt 1: fetch (follows GAS redirect, works on mobile) ──
+  var fetchUrl = _buildGasUrl(fn, params, 'json');
+
+  // Abort controller for timeout
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var fetchTimer = setTimeout(function() {
+    if (controller) controller.abort();
+    if (!settled) {
+      console.warn('fetch timeout for ' + fn + ', trying JSONP');
+      _gRunJsonp(fn, params, settle);
+    }
+  }, 10000);
+
+  fetch(fetchUrl, {
+    method: 'GET',
+    redirect: 'follow',
+    signal: controller ? controller.signal : undefined
+  })
+  .then(function(r) { return r.text(); })
+  .then(function(text) {
+    clearTimeout(fetchTimer);
+    if (settled) return; // JSONP already answered
+    // Strip JSONP wrapper if present (e.g. json({...}) or cbName({...}))
+    var clean = text.trim().replace(/^[^\(]+\(/, '').replace(/\);?\s*$/, '');
+    try {
+      settle(JSON.parse(clean));
+    } catch(e) {
+      console.warn('fetch parse error, trying JSONP:', e);
+      _gRunJsonp(fn, params, settle);
+    }
+  })
+  .catch(function(err) {
+    clearTimeout(fetchTimer);
+    if (settled) return;
+    console.warn('fetch failed (' + err + '), trying JSONP');
+    _gRunJsonp(fn, params, settle);
+  });
+}
+
+function _gRunJsonp(fn, params, cb) {
+  var cbName = '_gasCb_' + (++_jsonpSeq);
+  var url = _buildGasUrl(fn, params, cbName);
+  var script = document.createElement('script');
+
   var timer = setTimeout(function() {
     delete window[cbName];
-    script.remove();
-    console.error('gRun timeout for fn=' + fn);
+    if (script.parentNode) script.parentNode.removeChild(script);
     toast('Connection timed out. Check your GAS URL in Settings.', 'error');
-    cb && cb(null);
+    cb(null);
   }, 15000);
 
-  // Register callback before injecting the script tag
   window[cbName] = function(res) {
     clearTimeout(timer);
     delete window[cbName];
-    script.remove();
-    cb && cb(res);
+    if (script.parentNode) script.parentNode.removeChild(script);
+    cb(res);
   };
 
-  var script = document.createElement('script');
-  script.src = url;
   script.onerror = function() {
     clearTimeout(timer);
     delete window[cbName];
-    script.remove();
-    console.error('JSONP script load error for fn=' + fn);
+    if (script.parentNode) script.parentNode.removeChild(script);
     toast('Connection error — check GAS URL in Settings.', 'error');
-    cb && cb(null);
+    cb(null);
   };
+
+  script.src = url;
   document.head.appendChild(script);
 }
 
