@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- saved from url=(0053)file:///C:/Users/WAREHOUSE-PC/Downloads/index_90.html -->
+<html lang="en" data-theme="dark"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Ticketing System</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<link href="./index_files/css2" rel="stylesheet">
 <style>
   /* ── Dark Theme (default) ── */
   :root,
@@ -143,6 +143,82 @@
     border-right: 1px solid var(--border);
     display: flex; flex-direction: column;
     z-index: 100;
+    transition: width 0.25s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+  }
+  .sidebar.collapsed {
+    width: 56px;
+  }
+  .sidebar.collapsed .logo-sub,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed .nav-item span,
+  .sidebar.collapsed .admin-pill,
+  .sidebar.collapsed .theme-switcher-label,
+  .sidebar.collapsed .theme-btns,
+  .sidebar.collapsed .admin-toggle-btn span,
+  .sidebar.collapsed .logo-badge span {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    display: none;
+  }
+  .sidebar.collapsed .logo-badge {
+    padding: 8px;
+    justify-content: center;
+  }
+  .sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 10px;
+  }
+  .sidebar.collapsed .nav-item.active {
+    border-left: 3px solid var(--accent);
+    padding-left: 7px;
+  }
+  .sidebar.collapsed .admin-toggle-btn {
+    justify-content: center;
+    padding: 10px;
+  }
+  .sidebar.collapsed .theme-switcher {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 0;
+  }
+  .sidebar.collapsed .logo {
+    padding: 18px 8px;
+    display: flex;
+    justify-content: center;
+  }
+  .sidebar-toggle {
+    position: fixed;
+    top: 14px;
+    left: 204px;
+    z-index: 200;
+    width: 28px; height: 28px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: left 0.25s cubic-bezier(0.4,0,0.2,1), background 0.18s, transform 0.25s;
+    color: var(--muted);
+  }
+  .sidebar-toggle:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .sidebar-toggle.collapsed {
+    left: 20px;
+  }
+  .sidebar-toggle svg {
+    width: 14px; height: 14px;
+    transition: transform 0.25s;
+  }
+  .sidebar-toggle.collapsed svg {
+    transform: rotate(180deg);
   }
 
   .logo {
@@ -185,6 +261,10 @@
     margin-left: 240px;
     padding: 32px 36px;
     min-height: 100vh;
+    transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .main.sidebar-collapsed {
+    margin-left: 56px;
   }
 
   .page { display: none; }
@@ -511,59 +591,70 @@
   }
   @media (max-width: 768px) {
     .sidebar { width: 200px; }
+    .sidebar.collapsed { width: 48px; }
     .main { margin-left: 200px; padding: 20px; }
+    .main.sidebar-collapsed { margin-left: 48px; }
     .form-grid { grid-template-columns: 1fr; }
     .detail-grid { grid-template-columns: 1fr; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .sidebar-toggle { left: 164px; }
+    .sidebar-toggle.collapsed { left: 12px; }
   }
 </style>
 </head>
 <body>
+
+<!-- Sidebar Toggle -->
+<button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+</button>
 
 <!-- Sidebar -->
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-badge">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/>
+        <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"></path>
       </svg>
       IT DESK
     </div>
-    <div class="logo-sub">Support & Ticketing</div>
+    <div class="logo-sub">Support &amp; Ticketing</div>
   </div>
 
   <nav class="nav">
     <div class="nav-label">Menu</div>
-    <button class="nav-item active" onclick="navigate('dashboard')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <button class="nav-item active" onclick="navigate(&#39;dashboard&#39;)" title="Dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
       Dashboard
     </button>
-    <button class="nav-item" onclick="navigate('tickets')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H5z"/></svg>
+    <button class="nav-item" onclick="navigate(&#39;tickets&#39;)" title="All Tickets">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H5z"></path></svg>
       All Tickets
     </button>
-    <button class="nav-item" onclick="navigate('new-ticket')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <button class="nav-item" onclick="navigate(&#39;new-ticket&#39;)" title="New Ticket">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
       New Ticket
     </button>
 
     <div class="nav-label">System</div>
-    <button class="nav-item" onclick="pinPurpose='settings'; openPinModal()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <button class="nav-item" onclick="pinPurpose=&#39;settings&#39;; openPinModal()" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       Settings
     </button>
 
     <div class="nav-label">Filter</div>
-    <button class="nav-item" onclick="navigate('tickets', 'Open')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <button class="nav-item" onclick="navigate(&#39;tickets&#39;, &#39;Open&#39;)" title="Open">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
       Open
     </button>
-    <button class="nav-item" onclick="navigate('tickets', 'In Progress')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    <button class="nav-item" onclick="navigate(&#39;tickets&#39;, &#39;In Progress&#39;)" title="In Progress">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
       In Progress
     </button>
-    <button class="nav-item" onclick="navigate('tickets', 'Resolved')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    <button class="nav-item" onclick="navigate(&#39;tickets&#39;, &#39;Resolved&#39;)" title="Resolved">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
       Resolved
     </button>
   </nav>
@@ -571,7 +662,7 @@
   <!-- Admin Mode Toggle -->
   <div class="admin-toggle">
     <button class="admin-toggle-btn" id="admin-toggle-btn" onclick="handleAdminToggle()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
       <span id="admin-toggle-label">Admin Mode</span>
       <span class="admin-pill" id="admin-pill">OFF</span>
     </button>
@@ -581,15 +672,15 @@
   <div class="theme-switcher">
     <span class="theme-switcher-label">Theme</span>
     <div class="theme-btns">
-      <button class="theme-btn active" id="theme-btn-dark" onclick="setTheme('dark')" title="Dark">
+      <button class="theme-btn active" id="theme-btn-dark" onclick="setTheme(&#39;dark&#39;)" title="Dark">
         <div class="theme-dot theme-dot-dark">🌙</div>
         Dark
       </button>
-      <button class="theme-btn" id="theme-btn-light" onclick="setTheme('light')" title="Light">
+      <button class="theme-btn" id="theme-btn-light" onclick="setTheme(&#39;light&#39;)" title="Light">
         <div class="theme-dot theme-dot-light">☀️</div>
         Light
       </button>
-      <button class="theme-btn" id="theme-btn-slate" onclick="setTheme('slate')" title="Slate">
+      <button class="theme-btn" id="theme-btn-slate" onclick="setTheme(&#39;slate&#39;)" title="Slate">
         <div class="theme-dot theme-dot-slate">💬</div>
         Slate
       </button>
@@ -607,8 +698,8 @@
         <div class="page-title">Dashboard</div>
         <div class="page-sub">Overview of all IT support tickets</div>
       </div>
-      <button class="btn btn-primary" onclick="navigate('new-ticket')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <button class="btn btn-primary" onclick="navigate(&#39;new-ticket&#39;)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         New Ticket
       </button>
     </div>
@@ -616,23 +707,23 @@
     <div class="stats-grid">
       <div class="stat-card blue">
         <div class="stat-label">Total Tickets</div>
-        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-value" id="stat-total">0</div>
       </div>
       <div class="stat-card purple">
         <div class="stat-label">Open</div>
-        <div class="stat-value" id="stat-open">—</div>
+        <div class="stat-value" id="stat-open">0</div>
       </div>
       <div class="stat-card orange">
         <div class="stat-label">In Progress</div>
-        <div class="stat-value" id="stat-progress">—</div>
+        <div class="stat-value" id="stat-progress">0</div>
       </div>
       <div class="stat-card green">
         <div class="stat-label">Resolved</div>
-        <div class="stat-value" id="stat-resolved">—</div>
+        <div class="stat-value" id="stat-resolved">0</div>
       </div>
       <div class="stat-card red">
         <div class="stat-label">Critical</div>
-        <div class="stat-value" id="stat-critical">—</div>
+        <div class="stat-value" id="stat-critical">0</div>
       </div>
     </div>
 
@@ -645,9 +736,7 @@
             <thead>
               <tr><th>ID</th><th>Subject</th><th>Priority</th><th>Status</th></tr>
             </thead>
-            <tbody id="recent-tickets-body">
-              <tr><td colspan="4" style="text-align:center;padding:30px;"><div class="spinner"></div></td></tr>
-            </tbody>
+            <tbody id="recent-tickets-body"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">No tickets yet</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -658,9 +747,7 @@
         <div class="table-wrap">
           <table>
             <thead><tr><th>Category</th><th>Count</th></tr></thead>
-            <tbody id="category-body">
-              <tr><td colspan="2" style="text-align:center;padding:30px;"><div class="spinner"></div></td></tr>
-            </tbody>
+            <tbody id="category-body"><tr><td colspan="2" style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">No data yet</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -674,16 +761,16 @@
         <div class="page-title">Tickets</div>
         <div class="page-sub">All submitted IT support requests</div>
       </div>
-      <button class="btn btn-primary" onclick="navigate('new-ticket')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <button class="btn btn-primary" onclick="navigate(&#39;new-ticket&#39;)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         New Ticket
       </button>
     </div>
 
     <div class="toolbar">
       <div class="search-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input class="search-input" type="text" id="search-input" placeholder="Search tickets..." oninput="filterTickets()" />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input class="search-input" type="text" id="search-input" placeholder="Search tickets..." oninput="filterTickets()">
       </div>
       <select class="filter-select" id="filter-status" onchange="filterTickets()">
         <option value="">All Status</option>
@@ -704,7 +791,7 @@
         <option>Hardware</option>
         <option>Software</option>
         <option>Network</option>
-        <option>Accounts & Access</option>
+        <option>Accounts &amp; Access</option>
         <option>Email</option>
         <option>Printer</option>
         <option>Other</option>
@@ -747,7 +834,7 @@
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">Requester Name *</label>
-            <input class="form-input" type="text" id="f-name" placeholder="Your full name" />
+            <input class="form-input" type="text" id="f-name" placeholder="Your full name">
           </div>
           <div class="form-group">
             <label class="form-label">Department *</label>
@@ -768,7 +855,7 @@
           </div>
           <div class="form-group full">
             <label class="form-label">Email Address</label>
-            <input class="form-input" type="email" id="f-email" placeholder="you@company.com" />
+            <input class="form-input" type="email" id="f-email" placeholder="you@company.com">
           </div>
           <div class="form-group">
             <label class="form-label">Category *</label>
@@ -777,7 +864,7 @@
               <option>Hardware</option>
               <option>Software</option>
               <option>Network</option>
-              <option>Accounts & Access</option>
+              <option>Accounts &amp; Access</option>
               <option>Email</option>
               <option>Printer</option>
               <option>Other</option>
@@ -795,7 +882,7 @@
           </div>
           <div class="form-group full">
             <label class="form-label">Subject *</label>
-            <input class="form-input" type="text" id="f-subject" placeholder="Brief description of the issue" />
+            <input class="form-input" type="text" id="f-subject" placeholder="Brief description of the issue">
           </div>
           <div class="form-group full">
             <label class="form-label">Description *</label>
@@ -805,7 +892,7 @@
 
         <div style="display:flex;gap:10px;margin-top:20px;">
           <button class="btn btn-primary" onclick="submitNewTicket()" id="submit-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             Submit Ticket
           </button>
           <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
@@ -830,9 +917,7 @@
 
         <div class="form-group" style="margin-bottom:20px;">
           <label class="form-label">Web App URL</label>
-          <input class="form-input" type="text" id="settings-gas-url"
-            placeholder="https://script.google.com/macros/s/.../exec"
-            style="font-family:var(--mono);font-size:12px;" />
+          <input class="form-input" type="text" id="settings-gas-url" placeholder="https://script.google.com/macros/s/.../exec" style="font-family:var(--mono);font-size:12px;">
           <div style="font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--mono);">
             Paste your GAS deployment URL ending in /exec
           </div>
@@ -840,11 +925,11 @@
 
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <button class="btn btn-primary" onclick="saveGasUrl()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
             Save URL
           </button>
           <button class="btn btn-ghost" onclick="testGasUrl()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
             Test Connection
           </button>
           <span id="settings-status" style="font-size:12px;font-family:var(--mono);"></span>
@@ -858,7 +943,7 @@
         <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
           <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);color:var(--muted);margin-bottom:12px;">Security</div>
           <button class="btn btn-ghost" onclick="changePin()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
             Change PIN
           </button>
         </div>
@@ -878,28 +963,28 @@
         <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px;" id="modal-ticketid"></div>
       </div>
       <button class="modal-close" onclick="closeModal()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
     <div class="modal-body" id="modal-body">
       <div class="readonly-notice">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         View only — enable Admin Mode in the sidebar to make changes.
       </div>
       <!-- Populated by JS -->
     </div>
     <div class="form-footer">
       <button class="btn btn-danger btn-sm" id="delete-btn" onclick="deleteCurrentTicket()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>
         Delete
       </button>
       <button class="btn btn-ghost btn-sm" id="sign-btn" onclick="showSignatureModal()" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
         Sign
       </button>
       <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
       <button class="btn btn-primary btn-sm" id="save-btn" onclick="saveUpdate()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
         Save Changes
       </button>
     </div>
@@ -910,7 +995,7 @@
 <div class="pin-overlay" id="pin-overlay">
   <div class="pin-box">
     <div class="pin-icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
     </div>
     <div class="pin-title" id="pin-title">Settings PIN</div>
     <div class="pin-sub" id="pin-sub">Enter your 4-digit PIN to continue</div>
@@ -921,17 +1006,17 @@
       <div class="pin-dot" id="pin-d3"></div>
     </div>
     <div class="pin-keypad">
-      <button class="pin-key" onclick="pinKey('1')">1</button>
-      <button class="pin-key" onclick="pinKey('2')">2</button>
-      <button class="pin-key" onclick="pinKey('3')">3</button>
-      <button class="pin-key" onclick="pinKey('4')">4</button>
-      <button class="pin-key" onclick="pinKey('5')">5</button>
-      <button class="pin-key" onclick="pinKey('6')">6</button>
-      <button class="pin-key" onclick="pinKey('7')">7</button>
-      <button class="pin-key" onclick="pinKey('8')">8</button>
-      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key" onclick="pinKey(&#39;1&#39;)">1</button>
+      <button class="pin-key" onclick="pinKey(&#39;2&#39;)">2</button>
+      <button class="pin-key" onclick="pinKey(&#39;3&#39;)">3</button>
+      <button class="pin-key" onclick="pinKey(&#39;4&#39;)">4</button>
+      <button class="pin-key" onclick="pinKey(&#39;5&#39;)">5</button>
+      <button class="pin-key" onclick="pinKey(&#39;6&#39;)">6</button>
+      <button class="pin-key" onclick="pinKey(&#39;7&#39;)">7</button>
+      <button class="pin-key" onclick="pinKey(&#39;8&#39;)">8</button>
+      <button class="pin-key" onclick="pinKey(&#39;9&#39;)">9</button>
       <button class="pin-key del" onclick="pinCancel()">✕ Cancel</button>
-      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key" onclick="pinKey(&#39;0&#39;)">0</button>
       <button class="pin-key del" onclick="pinBackspace()">⌫</button>
     </div>
     <div class="pin-error-msg" id="pin-error"></div>
@@ -945,6 +1030,28 @@
 <div id="sig-modal-mount"></div>
 
 <script>
+// ── Sidebar Collapse ─────────────────────────────────────────
+(function initSidebar() {
+  let collapsed = false;
+  try { collapsed = localStorage.getItem('sidebar-collapsed') === 'true'; } catch(e) {}
+  if (collapsed) {
+    document.querySelector('.sidebar').classList.add('collapsed');
+    document.querySelector('.main').classList.add('sidebar-collapsed');
+    document.getElementById('sidebar-toggle').classList.add('collapsed');
+  }
+})();
+
+function toggleSidebar() {
+  const sidebar  = document.querySelector('.sidebar');
+  const main     = document.querySelector('.main');
+  const btn      = document.getElementById('sidebar-toggle');
+  const isNowCollapsed = !sidebar.classList.contains('collapsed');
+  sidebar.classList.toggle('collapsed', isNowCollapsed);
+  main.classList.toggle('sidebar-collapsed', isNowCollapsed);
+  btn.classList.toggle('collapsed', isNowCollapsed);
+  try { localStorage.setItem('sidebar-collapsed', isNowCollapsed); } catch(e) {}
+}
+
 // ── Config ───────────────────────────────────────────────────
 // GAS URL is loaded from localStorage (set via Settings page).
 // Fallback to hardcoded value if localStorage is empty.
@@ -1826,5 +1933,6 @@ function _persistSignature(dataUrl, name) {
   });
 }
 </script>
-</body>
-</html>
+
+
+</body></html>
