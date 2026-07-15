@@ -234,8 +234,9 @@
   /* ── Page Header ── */
   .page-header {
     display: flex; justify-content: space-between; align-items: flex-start;
-    margin-bottom: 28px;
+    margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
   }
+  .dash-grid { display: grid; grid-template-columns: 1fr 0.5fr; gap: 20px; }
   .page-title { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
   .page-sub { font-size: 13px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
 
@@ -314,12 +315,14 @@
     border-radius: 8px; padding: 9px 14px;
     color: var(--text); font-family: var(--sans); font-size: 13px;
     cursor: pointer; outline: none;
+    flex: 1 1 140px; min-width: 0;
   }
 
   .table-wrap {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; overflow: hidden;
+    border-radius: 14px; overflow-x: auto; -webkit-overflow-scrolling: touch;
   }
+  .td-truncate { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   table { width: 100%; border-collapse: collapse; }
   thead { background: var(--surface2); }
   th {
@@ -400,7 +403,7 @@
   .form-textarea { resize: vertical; min-height: 100px; }
 
   .form-footer {
-    display: flex; justify-content: flex-end; gap: 10px;
+    display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;
     padding: 20px 28px; border-top: 1px solid var(--border);
     position: sticky; bottom: 0; background: var(--surface);
   }
@@ -461,7 +464,7 @@
   .pin-overlay.open { display: flex; }
   .pin-box {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 36px 32px; width: 320px;
+    border-radius: 16px; padding: 36px 32px; width: 320px; max-width: 92vw;
     text-align: center; animation: slideUp .22s ease;
   }
   .pin-icon {
@@ -555,11 +558,47 @@
     .form-grid { grid-template-columns: 1fr; }
     .detail-grid { grid-template-columns: 1fr; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .dash-grid { grid-template-columns: 1fr; }
+    .toolbar { flex-direction: column; align-items: stretch; }
+    .search-wrap { min-width: 0; }
+    .modal-header, .modal-body, .form-footer { padding-left: 18px; padding-right: 18px; }
   }
   @media (min-width: 901px) {
     /* On desktop, hamburger hidden when sidebar is open */
     .hamburger:not(.open) { display: none; }
     .sidebar-backdrop { display: none !important; }
+  }
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-card { padding: 16px 14px; min-height: 90px; }
+    .stat-value { font-size: 26px; }
+    .page-title { font-size: 22px; }
+  }
+
+  /* ── Mobile card-style tables ── */
+  @media (max-width: 640px) {
+    .table-wrap table thead { position: absolute; left: -9999px; top: -9999px; }
+    .table-wrap table, .table-wrap tbody, .table-wrap tr, .table-wrap td { display: block; width: 100%; }
+    .table-wrap tbody tr {
+      border-bottom: 1px solid var(--border); padding: 12px 14px;
+    }
+    .table-wrap tbody tr:hover { background: none; }
+    .table-wrap td {
+      border-bottom: none; padding: 6px 0 6px 44%; position: relative;
+      text-align: left; min-height: 20px;
+    }
+    .table-wrap td.td-truncate { max-width: none; overflow: visible; text-overflow: clip; white-space: normal; }
+    .table-wrap td[data-label]::before {
+      content: attr(data-label);
+      position: absolute; left: 0; top: 6px; width: 40%;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--muted); font-family: var(--mono);
+      white-space: normal;
+    }
+    .table-wrap td:empty::before { content: none; }
+    /* Empty-state / spinner rows span the full row, no label column */
+    .table-wrap td[colspan] { padding-left: 0; }
+    .table-wrap td[colspan]::before { content: none; }
   }
 </style>
 </head>
@@ -691,7 +730,7 @@
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 0.5fr;gap:20px;">
+    <div class="dash-grid">
       <!-- Recent Tickets -->
       <div>
         <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Recent Tickets</div>
@@ -1198,17 +1237,17 @@ function computeAndRenderDashboard(tickets) {
   const catBody = document.getElementById('category-body');
   const entries = Object.entries(cats).sort((a,b) => b[1]-a[1]);
   catBody.innerHTML = entries.length ? entries.map(([k,v]) =>
-    '<tr><td>' + k + '</td><td><strong>' + v + '</strong></td></tr>').join('')
+    '<tr><td data-label="Category">' + k + '</td><td data-label="Count"><strong>' + v + '</strong></td></tr>').join('')
     : '<tr><td colspan="2" style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">No data yet</td></tr>';
 
   const recent = tickets.slice(0, 8);
   const tbody = document.getElementById('recent-tickets-body');
   tbody.innerHTML = recent.length ? recent.map(t =>
     '<tr data-ticket-id="' + t['Ticket ID'] + '">' +
-    '<td class="ticket-id-mono">' + t['Ticket ID'] + '</td>' +
-    '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t['Subject'] + '</td>' +
-    '<td>' + priorityBadge(t['Priority']) + '</td>' +
-    '<td>' + statusBadge(t['Status']) + '</td>' +
+    '<td class="ticket-id-mono" data-label="ID">' + t['Ticket ID'] + '</td>' +
+    '<td class="td-truncate" data-label="Subject">' + t['Subject'] + '</td>' +
+    '<td data-label="Priority">' + priorityBadge(t['Priority']) + '</td>' +
+    '<td data-label="Status">' + statusBadge(t['Status']) + '</td>' +
     '</tr>').join('')
     : '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">No tickets yet</td></tr>';
 }
@@ -1263,15 +1302,15 @@ function renderTickets(tickets) {
   }
   tbody.innerHTML = tickets.map(t =>
     `<tr data-ticket-id="${t['Ticket ID']}">
-      <td class="ticket-id-mono">${t['Ticket ID']}</td>
-      <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${formatDate(t['Date Submitted'])}</td>
-      <td>${t['Requester Name']}</td>
-      <td style="color:var(--muted)">${t['Department']}</td>
-      <td>${t['Category']}</td>
-      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t['Subject']}</td>
-      <td>${priorityBadge(t['Priority'])}</td>
-      <td>${statusBadge(t['Status'])}</td>
-      <td style="font-size:13px;white-space:nowrap">${
+      <td class="ticket-id-mono" data-label="Ticket ID">${t['Ticket ID']}</td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--muted)" data-label="Date">${formatDate(t['Date Submitted'])}</td>
+      <td data-label="Requester">${t['Requester Name']}</td>
+      <td style="color:var(--muted)" data-label="Department">${t['Department']}</td>
+      <td data-label="Category">${t['Category']}</td>
+      <td class="td-truncate" data-label="Subject">${t['Subject']}</td>
+      <td data-label="Priority">${priorityBadge(t['Priority'])}</td>
+      <td data-label="Status">${statusBadge(t['Status'])}</td>
+      <td style="font-size:13px" data-label="Acknowledged By">${
         t['Acknowledged By']
           ? `<span style="display:inline-flex;align-items:center;gap:5px;color:var(--success);font-weight:600">
                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>
@@ -1517,11 +1556,6 @@ function toast(msg, type='info') {
   c.appendChild(el);
   setTimeout(() => el.remove(), 4000);
 }
-
-// Close modal on overlay click
-document.getElementById('ticket-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
 
 // ── Event delegation for ticket rows (fixes GAS onclick sanitization) ──
 function attachTicketRowListeners(tbodyId) {
